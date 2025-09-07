@@ -13,15 +13,15 @@ from matplotlib.colors import LogNorm
 def align_images(input_img_1, input_img_2, pts_img_1, pts_img_2, save_images=False):
 
     # Load images
-    im1 = cv2.imread(input_img_1)
-    im1 = cv2.cvtColor(im1, cv2.COLOR_BGR2RGB)
+    img1 = cv2.imread(input_img_1)
+    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
 
-    im2 = cv2.imread(input_img_2)
-    im2 = cv2.cvtColor(im2, cv2.COLOR_BGR2RGB)
+    img2 = cv2.imread(input_img_2)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2RGB)
 
     # get image sizes
-    h1, w1, b1 = im1.shape
-    h2, w2, b2 = im2.shape
+    h1, w1, b1 = img1.shape
+    h2, w2, b2 = img2.shape
 
     # Get center coordinate of the line segment
     center_im1 = np.mean(pts_img_1, axis=0)
@@ -33,34 +33,34 @@ def align_images(input_img_1, input_img_2, pts_img_1, pts_img_2, save_images=Fal
     tx = np.around((w1 / 2 - center_im1[0]) * 2).astype(int)
 
     if tx > 0:
-        im1 = np.r_["1", np.zeros((im1.shape[0], tx, 3)), im1]
+        img1 = np.r_["1", np.zeros((img1.shape[0], tx, 3)), img1]
 
     else:
-        im1 = np.r_["1", im1, np.zeros((im1.shape[0], -tx, 3))]
+        img1 = np.r_["1", img1, np.zeros((img1.shape[0], -tx, 3))]
 
     ty = np.round((h1 / 2 - center_im1[1]) * 2).astype(int)
 
     if ty > 0:
-        im1 = np.r_["0", np.zeros((ty, im1.shape[1], 3)), im1]
+        img1 = np.r_["0", np.zeros((ty, img1.shape[1], 3)), img1]
 
     else:
-        im1 = np.r_["0", im1, np.zeros((-ty, im1.shape[1], 3))]
+        img1 = np.r_["0", img1, np.zeros((-ty, img1.shape[1], 3))]
 
     tx = np.around((w2 / 2 - center_im2[0]) * 2).astype(int)
 
     if tx > 0:
-        im2 = np.r_["1", np.zeros((im2.shape[0], tx, 3)), im2]
+        img2 = np.r_["1", np.zeros((img2.shape[0], tx, 3)), img2]
 
     else:
-        im2 = np.r_["1", im2, np.zeros((im2.shape[0], -tx, 3))]
+        img2 = np.r_["1", img2, np.zeros((img2.shape[0], -tx, 3))]
 
     ty = np.round((h2 / 2 - center_im2[1]) * 2).astype(int)
 
     if ty > 0:
-        im2 = np.r_["0", np.zeros((ty, im2.shape[1], 3)), im2]
+        img2 = np.r_["0", np.zeros((ty, img2.shape[1], 3)), img2]
 
     else:
-        im2 = np.r_["0", im2, np.zeros((-ty, im2.shape[1], 3))]
+        img2 = np.r_["0", img2, np.zeros((-ty, img2.shape[1], 3))]
 
     # downscale larger image so that lengths between ref points are the same
     len1 = np.linalg.norm(pts_img_1[0] - pts_img_1[1])
@@ -68,16 +68,16 @@ def align_images(input_img_1, input_img_2, pts_img_1, pts_img_2, save_images=Fal
     dscale = len2 / len1
 
     if dscale < 1:
-        width = int(im1.shape[1] * dscale)
-        height = int(im1.shape[0] * dscale)
+        width = int(img1.shape[1] * dscale)
+        height = int(img1.shape[0] * dscale)
         dim = (width, height)
-        im1 = cv2.resize(im1, dim, interpolation=cv2.INTER_LINEAR)
+        img1 = cv2.resize(img1, dim, interpolation=cv2.INTER_LINEAR)
 
     else:
-        width = int(im2.shape[1] * 1 / dscale)
-        height = int(im2.shape[0] * 1 / dscale)
+        width = int(img2.shape[1] * 1 / dscale)
+        height = int(img2.shape[0] * 1 / dscale)
         dim = (width, height)
-        im2 = cv2.resize(im2, dim, interpolation=cv2.INTER_LINEAR)
+        img2 = cv2.resize(img2, dim, interpolation=cv2.INTER_LINEAR)
 
     # rotate im1 so that angle between points is the same
     theta1 = np.arctan2(
@@ -89,7 +89,7 @@ def align_images(input_img_1, input_img_2, pts_img_1, pts_img_2, save_images=Fal
         pts_img_2[:, 0][1] - pts_img_2[:, 0][0],
     )
     dtheta = theta2 - theta1
-    rows, cols = im1.shape[:2]
+    rows, cols = img1.shape[:2]
     M = cv2.getRotationMatrix2D((cols / 2, rows / 2), dtheta * 180 / np.pi, 1)
     cos = np.abs(M[0, 0])
     sin = np.abs(M[0, 1])
@@ -102,40 +102,40 @@ def align_images(input_img_1, input_img_2, pts_img_1, pts_img_2, save_images=Fal
     M[0, 2] += (nW / 2) - cols / 2
     M[1, 2] += (nH / 2) - rows / 2
 
-    im1 = cv2.warpAffine(im1, M, (nW, nH))
+    img1 = cv2.warpAffine(img1, M, (nW, nH), borderMode=cv2.BORDER_REFLECT)
 
     # Crop images (on both sides of border) to be same height and width
-    h1, w1, b1 = im1.shape
-    h2, w2, b2 = im2.shape
+    h1, w1, b1 = img1.shape
+    h2, w2, b2 = img2.shape
 
     minw = min(w1, w2)
-    brd = (max(w1, w2) - minw) / 2
+    border = (max(w1, w2) - minw) / 2
     if minw == w1:  # crop w2
-        im2 = im2[:, ceil(brd) : -floor(brd), :]
-        tx = tx - ceil(brd)
+        img2 = img2[:, ceil(border) : -floor(border), :]
+        tx = tx - ceil(border)
     else:
-        im1 = im1[:, ceil(brd) : -floor(brd), :]
-        tx = tx + ceil(brd)
+        img1 = img1[:, ceil(border) : -floor(border), :]
+        tx = tx + ceil(border)
 
     minh = min(h1, h2)
-    brd = (max(h1, h2) - minh) / 2
+    border = (max(h1, h2) - minh) / 2
     if minh == h1:  # crop w2
-        im2 = im2[ceil(brd) : -floor(brd), :, :]
-        ty = ty - ceil(brd)
+        img2 = img2[ceil(border) : -floor(border), :, :]
+        ty = ty - ceil(border)
     else:
-        im1 = im1[ceil(brd) : -floor(brd), :, :]
-        ty = ty + ceil(brd)
+        img1 = img1[ceil(border) : -floor(border), :, :]
+        ty = ty + ceil(border)
 
-    im1 = cv2.cvtColor(im1.astype(np.uint8), cv2.COLOR_RGB2BGR)
-    im2 = cv2.cvtColor(im2.astype(np.uint8), cv2.COLOR_RGB2BGR)
+    img1 = cv2.cvtColor(img1.astype(np.uint8), cv2.COLOR_RGB2BGR)
+    img2 = cv2.cvtColor(img2.astype(np.uint8), cv2.COLOR_RGB2BGR)
 
     if save_images:
         output_img_1 = "aligned_{}".format(os.path.basename(input_img_1))
         output_img_2 = "aligned_{}".format(os.path.basename(input_img_2))
-        cv2.imwrite(output_img_1, im1)
-        cv2.imwrite(output_img_2, im2)
+        cv2.imwrite(output_img_1, img1)
+        cv2.imwrite(output_img_2, img2)
 
-    return im1, im2
+    return img1, img2
 
 
 def prompt_eye_selection(image):
