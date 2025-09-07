@@ -29,38 +29,64 @@ def align_images(input_img_1, input_img_2, pts_img_1, pts_img_2, save_images=Fal
 
     plt.close("all")
 
+    def translate(image, translation: tuple[int, int]):
+        x, y = translation
+        y_pad_term = (y, 0) if y > 0 else (0, -y)
+        x_pad_term = (x, 0) if x > 0 else (0, -x)
+
+        # Tuples are height (start, end); width (start, end); color (start, end)
+        return np.pad(image, (y_pad_term, x_pad_term, (0, 0)), mode="edge")
+
     # translate first so that center of ref points is center of image
     tx = np.around((w1 / 2 - center_im1[0]) * 2).astype(int)
 
-    if tx > 0:
-        img1 = np.r_["1", np.zeros((img1.shape[0], tx, 3)), img1]
+    # if tx > 0:
+    #     img1 = np.r_["1", np.zeros((img1.shape[0], tx, 3)), img1]
 
-    else:
-        img1 = np.r_["1", img1, np.zeros((img1.shape[0], -tx, 3))]
+    # else:
+    #     img1 = np.r_["1", img1, np.zeros((img1.shape[0], -tx, 3))]
 
     ty = np.round((h1 / 2 - center_im1[1]) * 2).astype(int)
 
-    if ty > 0:
-        img1 = np.r_["0", np.zeros((ty, img1.shape[1], 3)), img1]
+    img1 = translate(img1, (tx, ty))
 
-    else:
-        img1 = np.r_["0", img1, np.zeros((-ty, img1.shape[1], 3))]
+    # TYPE_FLAG = "pad"
+    # if ty > 0:
+    #     # Case: Pad the top of the image
+    #     match TYPE_FLAG:
+    #         case "zeros":
+    #             fill = np.zeros((ty, img1.shape[1], 3))
+    #             img1 = np.r_["0", fill, img1]
+    #         case "flip":
+    #             # Flip the image
+    #             fill = np.flipud(img1)
+    #             # Now we want the bottom of the flip
+    #             fill = fill[-ty:]
+    #             img1 = np.r_["0", fill, img1]
+    #         case "pad":
+    #             # Tuples are height (start, end); width (start, end); color (start, end)
+    #             img1 = np.pad(img1, ((ty, 0), (0, 0), (0, 0)), mode="edge")
+
+    # else:
+    #     img1 = np.r_["0", img1, np.zeros((-ty, img1.shape[1], 3))]
 
     tx = np.around((w2 / 2 - center_im2[0]) * 2).astype(int)
 
-    if tx > 0:
-        img2 = np.r_["1", np.zeros((img2.shape[0], tx, 3)), img2]
+    # if tx > 0:
+    #     img2 = np.r_["1", np.zeros((img2.shape[0], tx, 3)), img2]
 
-    else:
-        img2 = np.r_["1", img2, np.zeros((img2.shape[0], -tx, 3))]
+    # else:
+    #     img2 = np.r_["1", img2, np.zeros((img2.shape[0], -tx, 3))]
 
     ty = np.round((h2 / 2 - center_im2[1]) * 2).astype(int)
 
-    if ty > 0:
-        img2 = np.r_["0", np.zeros((ty, img2.shape[1], 3)), img2]
+    # if ty > 0:
+    #     img2 = np.r_["0", np.zeros((ty, img2.shape[1], 3)), img2]
 
-    else:
-        img2 = np.r_["0", img2, np.zeros((-ty, img2.shape[1], 3))]
+    # else:
+    #     img2 = np.r_["0", img2, np.zeros((-ty, img2.shape[1], 3))]
+
+    img2 = translate(img2, (tx, ty))
 
     # downscale larger image so that lengths between ref points are the same
     len1 = np.linalg.norm(pts_img_1[0] - pts_img_1[1])
