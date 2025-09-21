@@ -6,7 +6,8 @@ def cut(err_patch):
     Compute the minimum path frm the left to right side of the patch
 
     :param err_patch: numpy.ndarray    cost of cutting through each pixel
-    :return: numpy.ndarray             a 0-1 mask that indicates which pixels should be on either side of the cut
+    :return: numpy.ndarray             a 0-1 mask that indicates which pixels should be on either 
+    side of the cut
     """
 
     # create padding on top and bottom with very large cost
