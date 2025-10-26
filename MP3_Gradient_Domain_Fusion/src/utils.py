@@ -61,7 +61,7 @@ def upper_left_background_rc(object_mask, bottom_center):
     (h,w) = object_mask.shape[:2]
     upper_left_row = bottom_center[1]-int(max(ys)) 
     upper_left_col = bottom_center[0] - int(round(np.mean(xs)))
-    return [upper_left_row, upper_left_col]
+    return (upper_left_row, upper_left_col)
 
 def crop_object_img(object_img, object_mask):
     ys, xs = np.where(object_mask == 1)
