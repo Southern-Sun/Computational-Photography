@@ -67,9 +67,9 @@ def crop_object_img(object_img, object_mask):
     ys, xs = np.where(object_mask == 1)
     (h,w) = object_mask.shape[:2]
     x1 = min(xs)-1
-    x2 = max(xs)+1
+    x2 = max(xs)+2
     y1 = min(ys)-1
-    y2 = max(ys)+1
+    y2 = max(ys)+2
     object_mask = object_mask[y1:y2, x1:x2]
     object_img = object_img[y1:y2, x1:x2, :]
     return object_img, object_mask
