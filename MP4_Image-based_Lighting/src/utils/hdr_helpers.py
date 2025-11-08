@@ -9,7 +9,7 @@ import scipy.sparse
 import scipy.sparse.linalg
 
 # implementation
-def gsolve(Z: np.ndarray, B: np.ndarray, l: int, w) -> (np.ndarray, np.ndarray):
+def gsolve(Z: np.ndarray, B: np.ndarray, l: int, w) -> tuple[np.ndarray, np.ndarray]:
     '''
     Given a set of pixel values observed for several pixels in several
     images with different exposure times, this function returns the
