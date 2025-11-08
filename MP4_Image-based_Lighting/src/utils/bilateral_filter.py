@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Implements python port of bilateralFilter.m """
+"""Implements python port of bilateralFilter.m"""
 
 # imports
 import numpy as np
@@ -8,12 +8,17 @@ from scipy.interpolate import interpn, LinearNDInterpolator
 from scipy.ndimage import convolve
 
 
-
-def bilateral_filter(data: np.ndarray, edge=None,
-                     edge_min=None, edge_max=None,
-                     sigma_spatial=None, sigma_range=None,
-                     sampling_spatial=None, sampling_range=None) -> np.ndarray:
-    '''
+def bilateral_filter(
+    data: np.ndarray,
+    edge=None,
+    edge_min=None,
+    edge_max=None,
+    sigma_spatial=None,
+    sigma_range=None,
+    sampling_spatial=None,
+    sampling_range=None,
+) -> np.ndarray:
+    """
     Bilateral and Cross-Bilateral Filter using the Bilateral Grid.
 
     Bilaterally filters the image 'data' using the edges in the image 'edge'.
@@ -53,20 +58,20 @@ def bilateral_filter(data: np.ndarray, edge=None,
 
     samplingSpatial = sigmaSpatial
     samplingRange = sigmaRange
-    '''
+    """
     assert len(data.shape) == 2
 
     # assign edge iff not assigned
-    if(edge is None):
+    if edge is None:
         edge = data
 
     assert len(edge.shape) == 2
     IH, IW = data.shape
 
     # setup parameters
-    if(edge_min is None):
+    if edge_min is None:
         edge_min = edge.min()
-    if(edge_max is None):
+    if edge_max is None:
         edge_max = edge.max()
 
     edge_delta = edge_max - edge_min
@@ -125,13 +130,13 @@ def bilateral_filter(data: np.ndarray, edge=None,
     dwf = dw.flatten()
     dzf = dz.flatten()
     ddf = data.flatten()
-    
+
     for k in range(dz.size):
         dhk = dhf[k]
         dwk = dwf[k]
         dzk = dzf[k]
         dataZ = ddf[k]
-        if (dataZ is not None) and (dataZ != float('nan')):
+        if (dataZ is not None) and (dataZ != float("nan")):
             grid_data[dhk, dwk, dzk] += dataZ
             grid_weights[dhk, dwk, dzk] += 1
 
@@ -149,14 +154,15 @@ def bilateral_filter(data: np.ndarray, edge=None,
     gridY = gridY - halfKH
     gridZ = gridZ - halfKD
 
-    gridRSquared = (gridX ** 2 + gridY ** 2) / (derived_sigma_spatial ** 2) +\
-        (gridZ ** 2) / (derived_sigma_range ** 2)
+    gridRSquared = (gridX**2 + gridY**2) / (derived_sigma_spatial**2) + (
+        gridZ**2
+    ) / (derived_sigma_range**2)
 
     kernel = np.exp(-0.5 * gridRSquared)
 
     # convolve
-    blurredGridData = convolve(grid_data, kernel, mode='constant')
-    blurredGridWeights = convolve(grid_weights, kernel, mode='constant')
+    blurredGridData = convolve(grid_data, kernel, mode="constant")
+    blurredGridWeights = convolve(grid_weights, kernel, mode="constant")
 
     # divide
     # avoid divide by 0, won't read there anyway
