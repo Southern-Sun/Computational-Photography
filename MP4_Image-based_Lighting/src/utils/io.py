@@ -3,6 +3,7 @@
 
 import cv2
 import numpy as np
+from pathlib import Path
 
 
 def write_image(image: np.ndarray, image_path: str):
@@ -50,12 +51,12 @@ def read_hdr_image(image_path: str) -> np.ndarray:
     """
 
     # read image and convert to RGB
-    bgr_hdr_image = cv2.imread(image_path, cv2.IMREAD_ANYDEPTH)
+    bgr_hdr_image = cv2.imread(image_path, cv2.IMREAD_ANYDEPTH | cv2.IMREAD_COLOR_BGR)
     rgb_hdr_image = bgr_hdr_image[:, :, [2, 1, 0]]
     return rgb_hdr_image.astype(np.float32)
 
 
-def write_hdr_image(hdr_image: np.ndarray, image_path: str):
+def write_hdr_image(hdr_image: np.ndarray, image_path: Path):
     """
     Write HDR image to given path.
     The path must end with '.hdr' extension
@@ -66,6 +67,6 @@ def write_hdr_image(hdr_image: np.ndarray, image_path: str):
     Returns:
         RGB image of shape H x W x 3 in floating point format
     """
-    assert image_path.endswith(".hdr")
+    assert image_path.suffix == ".hdr"
     rgb_hdr_image = hdr_image[:, :, [2, 1, 0]]
     cv2.imwrite(image_path, rgb_hdr_image)
